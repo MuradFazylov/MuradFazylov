@@ -30,18 +30,26 @@ class GroupController extends Controller
     return response()->json($groups, 200);
   }
 
-  public function create(Request $req){   
+  public function create(Request $req){    
     $data = $req->all();
     $name = $data['number'];
-    $mentor =$data['mentor'];
+    $mentor = $data['mentor'];
     $couching = $data['couching'];
+    $group_region = $data['group_region'];
+    $type = $data['type'];
+
+    $groups = DB::select("SELECT * FROM `group` WHERE `name` = '$name' AND `couching` = '$couching'");
+    if(count($groups) > 0){
+      $respose['message'] = 'ОШИБКА! Группа с такими параметрами уже существует';
+      return response()->json($respose, 400);
+    }
     
     $query = DB::connection()->getPdo()->exec(
       "INSERT 
-      INTO `group` (`name`, `mentor`, `couching`) 
-      VALUES ('$name', '$mentor', '$couching')"
+      INTO `group` (`name`, `mentor`, `couching`, `group_region`, `type`) 
+      VALUES ('$name', '$mentor', '$couching', '$group_region', '$type')"
       );
-    $respose['message'] = 'Успешно! Группа добавлено';
+    $respose['message'] = 'Успешно! Группа добавлена';
     return response()->json($respose, 201);
   }
 
@@ -68,7 +76,6 @@ class GroupController extends Controller
       $query = DB::connection()->getPdo()->exec(
         "UPDATE `group` SET `amount` = `amount`+1 WHERE `name`= '$group' AND `couching` = 13");
     }
-
     
     $respose['message'] = 'success';
     return response()->json($respose, 201);

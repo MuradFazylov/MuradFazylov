@@ -16,6 +16,7 @@ class AuthKey
   public function handle($request, Closure $next)
   {
     $token = $request->header('Token');
+    
     if(isset($token)){
       $tmp = $this->checkToken($token);
     }

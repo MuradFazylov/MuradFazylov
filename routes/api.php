@@ -54,7 +54,7 @@ Route::get('regions/{lang}', 'Businessman\BusinessmanController@regions');
 Route::post('addBusinessman', 'Businessman\BusinessmanController@addBusinessman');
 Route::post('businessman/create/group', 'Businessman\BusinessmanController@addBusinessmanGroup');
 Route::post('upload/avatar', 'Businessman\BusinessmanController@uploadAvatar');
-Route::post('upload/passport', 'Businessman\BusinessmanController@uploadPassport');
+
 Route::post('upload/logo', 'Businessman\BusinessmanController@uploadLogo');
 Route::post('businessman/edit', 'Businessman\BusinessmanController@updateBusinessman');
 Route::get('businessman/block/{id}', 'Businessman\BusinessmanController@blockBusinessman');
@@ -65,7 +65,9 @@ Route::post('lesson/create', 'Lesson\LessonController@create');
 Route::delete('lesson/delete/{id}', 'Lesson\LessonController@delete');
 
 Route::middleware('AuthKey')->get('couchings', 'Couching\CouchingController@couching');
+Route::middleware('AuthKey')->get('setAll', 'Couching\CouchingController@setCouchingNumber');
 Route::post('couching/create', 'Couching\CouchingController@create');
+Route::get('couching/last', 'Couching\CouchingController@getLastCouching');
 
 Route::get('secret/sessions/{id}', 'User\AuthorizationController@getUserSessionsById');
 Route::post('secret/create', 'User\AuthorizationController@create');
@@ -120,4 +122,5 @@ Route::get('homework/group/{id}', 'Homework\HomeworkController@getHomeworkByGrou
 Route::get('homework/lesson/{id}', 'Homework\HomeworkController@getHomeworkByLesson');
 Route::post('homework/add', 'Homework\HomeworkController@addNewData');
 
-Route::get('image/passport/{id}', 'File\ImageController@getPassport');
+Route::get('image/passport/{id}', 'Businessman\PassportController@getPassport');
+Route::post('upload/passport', 'Businessman\PassportController@uploadPassport');

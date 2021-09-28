@@ -30,17 +30,20 @@ class BusinessmanController extends Controller
     }
   }
   
-  public function getBusinessmen(){
-    $users = DB::select("SELECT * FROM `businessman` WHERE `status` <> 'deleted' ORDER BY `id` DESC");
+  public function getBusinessmen(Request $req){  
+    $users = DB::select("SELECT * FROM `businessman` WHERE `status` <> 'deleted' AND `couching_value` = $req->couching ORDER BY `id` DESC");
     return response()->json($users, 200);
   }
 
-  public function getBusinessmenByStatus($status){
+  public function getBusinessmenByStatus(Request $req, $status){
+    // print_r($req->test);
+    // print_r($status);
+    // die();
     if($status != 'blacklist'){
-      $users = DB::select("SELECT * FROM `businessman` WHERE `status` = '$status' ORDER BY `id` DESC");
+      $users = DB::select("SELECT * FROM `businessman` WHERE `status` = '$status' AND `couching_value` = '$req->couching' ORDER BY `id` DESC");
     }
     if($status == 'blacklist'){
-      $users = DB::select("SELECT * FROM `businessman` WHERE `blacklist` = '1' ORDER BY `id` DESC");
+      $users = DB::select("SELECT * FROM `businessman` WHERE `blacklist` = '1' AND `couching_value` = '$req->couching' ORDER BY `id` DESC");
     }
     return response()->json($users, 200);
   }
@@ -58,11 +61,6 @@ class BusinessmanController extends Controller
 
     $response['data'] = $resp;
     return response()->json($response, 200);
-  }
-
-  public function getBusinessmanByLesson(){
-    $users = DB::select("SELECT * FROM `businessman`");
-    return response()->json($users, 200);
   }
 
   public function getBusinessmanById($id){
@@ -93,8 +91,8 @@ class BusinessmanController extends Controller
       $date_create = time();
       $query = DB::connection()->getPdo()->exec(
         "INSERT 
-        INTO `businessman` (`name`, `surname`, `sex`, `telephone`, `region_id`, `status`, `date_create`, `payment`, `work`, `position`) 
-        VALUES ('$name', '$surname', '$sex', '$telephone', '$region_id', '$status', '$date_create', '$payment', '$work', '$position')"
+        INTO `businessman` (`name`, `surname`, `sex`, `telephone`, `region_id`, `status`, `date_create`, `payment`, `work`, `position`, `couching_value`) 
+        VALUES ('$name', '$surname', '$sex', '$telephone', '$region_id', '$status', '$date_create', '$payment', '$work', '$position', '14')"
       );
       if($query = 1){
         $count++;
@@ -121,12 +119,13 @@ class BusinessmanController extends Controller
     $instagram = $data['instagram'];
     $facebook = $data['facebook'];
     $payment = $data['payment'];
+    $couching_value = $data['couching_value'];
     $date_create = time();
     
     $query = DB::connection()->getPdo()->exec(
       "INSERT 
-      INTO `businessman` (`name`, `surname`, `sex`, `telephone`, `region_id`, `status`, `moderator_id`, `date_create`, `img`, `passport_scan`, `telegram`, `instagram`, `facebook`, `payment`) 
-      VALUES ('$name', '$surname', '$sex', '$telephone', '$region_id', '$status', '$moderator_id', '$date_create', '$img', '$passport_scan', '$telegram', '$instagram', '$facebook', '$payment')"
+      INTO `businessman` (`name`, `surname`, `sex`, `telephone`, `region_id`, `status`, `moderator_id`, `date_create`, `img`, `passport_scan`, `telegram`, `instagram`, `facebook`, `payment`, `couching_value`) 
+      VALUES ('$name', '$surname', '$sex', '$telephone', '$region_id', '$status', '$moderator_id', '$date_create', '$img', '$passport_scan', '$telegram', '$instagram', '$facebook', '$payment', $couching_value)"
     );
 
     if(isset($group_id)){    
@@ -240,15 +239,6 @@ class BusinessmanController extends Controller
   public function uploadAvatar(Request $req){
     $filename = time().".".$req->file('img')->getClientOriginalExtension();
     $result = $req->file('img')->move(public_path('uploads/avatars'), $filename);
-    // $result = $req->file('file')->store('apiDocs');
-    // return $filename;
-    $respose = ["filename"=>$filename];
-    return response()->json($respose, 201);
-  }
-
-  public function uploadPassport(Request $req){
-    $filename = time().".".$req->file('img')->getClientOriginalExtension();
-    $result = $req->file('img')->move(public_path('uploads/passports'), $filename);
     $respose = ["filename"=>$filename];
     return response()->json($respose, 201);
   }
@@ -280,6 +270,7 @@ class BusinessmanController extends Controller
     $regions = DB::select("SELECT id, name_ru as `name` FROM `regions`");
 
     $response = [];
+
     for($j = 0; $j < count($regions); $j++){
       $resp['id'] = $regions[$j]->id;
       $resp['name'] = $regions[$j]->name;
@@ -287,7 +278,6 @@ class BusinessmanController extends Controller
       $resp['online'] = 0;
       array_push($response, $resp);
     }
-
 
     for($i = 0; $i < count($businessmen); $i++){
       for($j = 0; $j < count($response); $j++){
